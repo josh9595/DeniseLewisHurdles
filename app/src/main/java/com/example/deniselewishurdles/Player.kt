@@ -15,6 +15,9 @@ class Player(
     var isJumping = false
     var jumpCounter = 0
 
+    val width = screenX / 2.5f
+    val height = width
+
     private val startBitmap: Bitmap = BitmapFactory.decodeResource(
         context.resources,
         R.drawable.denise_start)
@@ -48,14 +51,24 @@ class Player(
         context.resources,
         R.drawable.denise_run_2)
 
-    var visibleBitmap: Bitmap = startBitmap
+    val setBitmap: Bitmap = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.denise_set)
 
-    val width = screenX / 2.5f
-    val height = width
+    val lostBitmap: Bitmap = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.denise_lost)
+
+    val visableSetBitmap = Bitmap.createScaledBitmap(setBitmap,
+        width.toInt() ,
+        height.toInt() ,
+        false)
+
+    var visibleBitmap: Bitmap = startBitmap
 
     val position = RectF(
         screenX / 30f,
-        screenY / 1.5f,
+        screenY / 1.55f,
         screenX/2 + width,
         screenY.toFloat())
 
@@ -78,7 +91,7 @@ class Player(
             false)
     }
 
-    fun update(fps: Long, score: Int) {
+    fun update(fps: Long, score: Int, lost: Boolean) {
 
         if (isJumping && jumpCounter <= 10) {
             position.top -= (speed*3f) / fps
@@ -113,6 +126,14 @@ class Player(
 
             visibleBitmap = Bitmap.createScaledBitmap(
                 runningBitmaps[currentRunBitmap],
+                width.toInt() ,
+                height.toInt() ,
+                false)
+        }
+
+        if (lost) {
+            visibleBitmap = Bitmap.createScaledBitmap(
+                lostBitmap,
                 width.toInt() ,
                 height.toInt() ,
                 false)

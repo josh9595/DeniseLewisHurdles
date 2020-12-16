@@ -64,7 +64,6 @@ class GameView (
                     score = (((startFrameTime - startOfGameTime) / 100)).toInt()
                     if (score > highScore) highScore = score
                 }
-
             }
 
             if (gameStartAnimation != onStart) {
@@ -96,7 +95,7 @@ class GameView (
             lost = true
         }
 
-        player.update(fps, score)
+        player.update(fps, score, lost)
         track.update(fps)
         hurdle.update(fps, score, lost)
         crowd1.update(fps, score)
@@ -181,11 +180,21 @@ class GameView (
                 hurdle.position.top,
                 paint)
 
-            canvas.drawBitmap(
-                player.visibleBitmap,
-                player.position.left,
-                player.position.top,
-                paint)
+            if (gameStartAnimation == onSet) {
+                canvas.drawBitmap(
+                    player.visableSetBitmap,
+                    player.position.left,
+                    player.position.top,
+                    paint)
+            } else {
+                canvas.drawBitmap(
+                    player.visibleBitmap,
+                    player.position.left,
+                    player.position.top,
+                    paint)
+            }
+
+
 
             paint.color = Color.argb(255, 255, 255, 255)
             paint.textSize = 70f
@@ -197,16 +206,16 @@ class GameView (
 //            canvas.drawText("Hurdle ${hurdle.position.left.toInt()} ${hurdle.position.top.toInt()} ", 0f, 150f, paint)
 
             if (gameStartAnimation == onMarks) {
-                canvas.drawText("Marks!", size.x / 4f, size.y * 0.98f, paint)
+                canvas.drawText("Marks!", size.x / 4f, size.y * 0.95f, paint)
             }
 
             if (gameStartAnimation == onSet) {
-                canvas.drawText("Marks! Set!", size.x / 4f, size.y * 0.98f, paint)
+                canvas.drawText("Marks! Set!", size.x / 4f, size.y * 0.95f, paint)
             }
 
             if (gameStartAnimation == onGo) {
-                canvas.drawText("Marks! Set!", size.x / 4f, size.y * 0.98f, paint)
-                canvas.drawText("Go!", size.x / 4f, size.y * 1.02f, paint)
+                canvas.drawText("Marks! Set!", size.x / 4f, size.y * 0.95f, paint)
+                canvas.drawText("Go!", size.x / 4f, size.y * 1f, paint)
             }
 
             holder.unlockCanvasAndPost(canvas)
