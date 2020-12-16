@@ -18,6 +18,8 @@ class GameView (
     private var lost = false
     private var score = 0
     private var startOfGameTime: Long = 0
+    private var startAnimationTime: Long = 0
+    private var gameStartAnimation = onStart
 
     private val assetManager = context.assets
     private var canvas: Canvas = Canvas()
@@ -37,7 +39,6 @@ class GameView (
     private var highScore =  prefs.getInt("highScore", 0)
 
     private fun prepareLevel() {
-        // Here we will initialize the game objects
         track = Track(context, size.x, size.y)
         player = Player(context, size.x, size.y)
         hurdle = Hurdle(context, size.x, size.y)
@@ -46,7 +47,7 @@ class GameView (
         cloud1 = Cloud(context, size.x, size.y, 1)
         cloud2 = Cloud(context, size.x, size.y, 2)
         score = 0
-        startOfGameTime = System.currentTimeMillis()
+        startOfGameTime = 0L
         lost = false
     }
 
@@ -66,6 +67,21 @@ class GameView (
 
             }
 
+            if (gameStartAnimation != onStart) {
+                when {
+                    (System.currentTimeMillis() - startAnimationTime) / 1000 > 3 -> {
+                        gameStartAnimation = onStart
+                    }
+                    (System.currentTimeMillis() - startAnimationTime) / 1000 > 2 -> {
+                        gameStartAnimation = onGo
+                        paused = false
+                    }
+                    (System.currentTimeMillis() - startAnimationTime) / 1000 > 1 -> {
+                        gameStartAnimation = onSet
+                    }
+                }
+            }
+
             draw()
 
             val timeThisFrame = System.currentTimeMillis() - startFrameTime
@@ -76,22 +92,43 @@ class GameView (
     }
 
     private fun update(fps: Long) {
+        if (playerCollisionLeft() && !playerPastHurdle()) {
+            lost = true
+        }
+
         player.update(fps, score)
         track.update(fps)
-        hurdle.update(fps, score)
+        hurdle.update(fps, score, lost)
         crowd1.update(fps, score)
         crowd2.update(fps, score)
         cloud1.update(fps)
         cloud2.update(fps)
 
-        if (player.position.left + player.width >= hurdle.position.left &&
-                (player.position.top + player.height) >= hurdle.position.top) {
-            lost = true
-        }
-
         if (lost) {
             paused = true
+            setHighScore()
         }
+    }
+
+    private fun playerCollisionLeft (): Boolean {
+        return ((player.position.left + player.width * 0.9) >= hurdle.position.left  &&
+                (player.position.top + player.height * 0.7) >= hurdle.position.top)
+    }
+
+    private fun playerPastHurdle (): Boolean {
+        return (player.position.left + player.width * 0.6) >= (hurdle.position.left + (hurdle.width / 2) )
+    }
+
+    private fun startGame() {
+        startAnimationTime = System.currentTimeMillis()
+        gameStartAnimation = onMarks
+    }
+
+    companion object {
+        const val onStart = 0
+        const val onMarks = 1
+        const val onSet = 2
+        const val onGo = 3
     }
 
     private fun draw() {
@@ -159,6 +196,19 @@ class GameView (
 //            canvas.drawText("Player ${player.position.left.toInt() + player.width.toInt()} ${player.position.top.toInt() + player.height.toInt()} ", 0f, 50f, paint)
 //            canvas.drawText("Hurdle ${hurdle.position.left.toInt()} ${hurdle.position.top.toInt()} ", 0f, 150f, paint)
 
+            if (gameStartAnimation == onMarks) {
+                canvas.drawText("Marks!", size.x / 4f, size.y * 0.98f, paint)
+            }
+
+            if (gameStartAnimation == onSet) {
+                canvas.drawText("Marks! Set!", size.x / 4f, size.y * 0.98f, paint)
+            }
+
+            if (gameStartAnimation == onGo) {
+                canvas.drawText("Marks! Set!", size.x / 4f, size.y * 0.98f, paint)
+                canvas.drawText("Go!", size.x / 4f, size.y * 1.02f, paint)
+            }
+
             holder.unlockCanvasAndPost(canvas)
         }
     }
@@ -171,6 +221,11 @@ class GameView (
             Log.e("Error:", "joining thread")
         }
 
+        setHighScore()
+
+    }
+
+    private fun setHighScore() {
         val prefs = context.getSharedPreferences(
             "denise-lewis",
             Context.MODE_PRIVATE)
@@ -192,22 +247,20 @@ class GameView (
         gameThread.start()
     }
 
-    // The SurfaceView class implements onTouchListener
-    // So we can override this method and detect screen touches.
     override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
         if (!lost) {
             when (motionEvent.action and MotionEvent.ACTION_MASK) {
 
-                // Player has touched the screen
-                // Or moved their finger while touching screen
                 MotionEvent.ACTION_POINTER_DOWN,
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_MOVE-> {
-                    paused = false
-                    player.state = Player.jump
+                    if (paused) {
+                        startGame()
+                    } else {
+                        player.state = Player.jump
+                    }
                 }
 
-                // Player has removed finger from screen
                 MotionEvent.ACTION_POINTER_UP,
                 MotionEvent.ACTION_UP -> {
                     player.state = Player.run
@@ -216,6 +269,7 @@ class GameView (
             }
         } else {
             prepareLevel()
+            playing = true
         }
 
         return true

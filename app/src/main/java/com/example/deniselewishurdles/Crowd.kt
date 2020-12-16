@@ -37,7 +37,7 @@ class Crowd(
         if (position.left <= -(screenX * 1.5f)) {
             position.left = screenX * 1.5f
         } else {
-            position.left -= (speed/1.5f) / fps
+            position.left -= (speed/2.5f) / fps
         }
     }
 }

@@ -10,9 +10,15 @@ class Hurdle(
     private val screenX: Int,
     private val screenY: Int) {
 
-    var bitmap: Bitmap = BitmapFactory.decodeResource(
+    val hurdle: Bitmap = BitmapFactory.decodeResource(
         context.resources,
         R.drawable.hurdle)
+
+    var hurdleDown: Bitmap = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.hurdle_down)
+
+    var bitmap: Bitmap = hurdle
 
     val width = screenX / 5f
     private val height = width
@@ -25,27 +31,25 @@ class Hurdle(
 
     private val speed  = 450f
 
-    companion object {
-        // Which ways can the ship move
-        const val stopped = 0
-        const val left = 1
-        const val right = 2
-    }
-
-    var moving = stopped
-
     init{
-        bitmap = Bitmap.createScaledBitmap(bitmap,
+        bitmap = Bitmap.createScaledBitmap(hurdle,
             width.toInt() ,
             height.toInt() ,
             false)
     }
 
-    fun update(fps: Long, score: Int) {
+    fun update(fps: Long, score: Int, lost: Boolean) {
+            if (lost) {
+                bitmap = Bitmap.createScaledBitmap(hurdleDown,
+                    width.toInt() ,
+                    height.toInt() ,
+                    false)
+            }
+
             if (position.left < -(screenX / 5f)) {
                 position.left = screenX.toFloat()
             } else {
-                if (score > 20) position.left -= speed / fps
+                if (score > 20) position.left -= (speed * 1.5f) / fps
             }
     }
 
