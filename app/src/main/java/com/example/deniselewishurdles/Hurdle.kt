@@ -19,7 +19,7 @@ class Hurdle(
 
     val position = RectF(
         screenX.toFloat(),
-        screenY / 1.66f,
+        screenY / 1.3f,
         screenX/2 + width,
         screenY.toFloat())
 

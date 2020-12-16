@@ -19,7 +19,7 @@ class Track(
 
     val position = RectF(
         -10f,
-        screenY / 4f,
+        screenY / 3f,
         screenX/2 + width,
         screenY.toFloat())
 

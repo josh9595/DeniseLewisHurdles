@@ -27,6 +27,8 @@ class GameView (
     private var hurdle: Hurdle = Hurdle(context, size.x, size.y)
     private var crowd1: Crowd = Crowd(context, size.x, size.y, 1)
     private var crowd2: Crowd = Crowd(context, size.x, size.y, 2)
+    private var cloud1: Cloud = Cloud(context, size.x, size.y, 1)
+    private var cloud2: Cloud = Cloud(context, size.x, size.y, 2)
     private var scoreboard: Scoreboard = Scoreboard(context, size.x, size.y)
     private val prefs: SharedPreferences = context.getSharedPreferences(
         "denise-lewis",
@@ -41,6 +43,8 @@ class GameView (
         hurdle = Hurdle(context, size.x, size.y)
         crowd1 = Crowd(context, size.x, size.y, 1)
         crowd2 = Crowd(context, size.x, size.y, 2)
+        cloud1 = Cloud(context, size.x, size.y, 1)
+        cloud2 = Cloud(context, size.x, size.y, 2)
         score = 0
         startOfGameTime = System.currentTimeMillis()
         lost = false
@@ -75,8 +79,10 @@ class GameView (
         player.update(fps, score)
         track.update(fps)
         hurdle.update(fps, score)
-        crowd1.update(fps)
-        crowd2.update(fps)
+        crowd1.update(fps, score)
+        crowd2.update(fps, score)
+        cloud1.update(fps)
+        cloud2.update(fps)
 
         if (player.position.left + player.width >= hurdle.position.left &&
                 (player.position.top + player.height) >= hurdle.position.top) {
@@ -92,7 +98,21 @@ class GameView (
         if (holder.surface.isValid) {
             canvas = holder.lockCanvas()
             canvas.drawColor(Color.argb(255, 0, 164, 1))
-            paint.color = Color.argb(255, 0, 255, 0)
+            paint.color = Color.argb(255, 83, 121, 203)
+
+            canvas.drawRect(0f, 0f, size.x.toFloat(), size.y / 2f, paint)
+
+            canvas.drawBitmap(
+                cloud1.bitmap,
+                cloud1.position.left,
+                cloud1.position.top,
+                paint)
+
+            canvas.drawBitmap(
+                cloud2.bitmap,
+                cloud2.position.left,
+                cloud2.position.top,
+                paint)
 
             canvas.drawBitmap(
                 scoreboard.bitmap,

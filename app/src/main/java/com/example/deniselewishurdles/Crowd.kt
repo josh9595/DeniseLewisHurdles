@@ -26,14 +26,6 @@ class Crowd(
 
     private val speed  = 450f
 
-    companion object {
-        const val stopped = 0
-        const val left = 1
-        const val right = 2
-    }
-
-    var moving = stopped
-
     init{
         bitmap = Bitmap.createScaledBitmap(bitmap,
             width.toInt() ,
@@ -41,7 +33,7 @@ class Crowd(
             false)
     }
 
-    fun update(fps: Long) {
+    fun update(fps: Long, score: Int) {
         if (position.left <= -(screenX * 1.5f)) {
             position.left = screenX * 1.5f
         } else {

@@ -12,6 +12,8 @@ class Player(
 
     var currentScore = 0
     var currentRunBitmap = 0
+    var isJumping = false
+    var jumpCounter = 0
 
     private val startBitmap: Bitmap = BitmapFactory.decodeResource(
         context.resources,
@@ -46,10 +48,6 @@ class Player(
         context.resources,
         R.drawable.denise_run_2)
 
-    val jump3Bitmap: Bitmap = BitmapFactory.decodeResource(
-        context.resources,
-        R.drawable.denise_run_3)
-
     var visibleBitmap: Bitmap = startBitmap
 
     val width = screenX / 2.5f
@@ -57,7 +55,7 @@ class Player(
 
     val position = RectF(
         screenX / 30f,
-        screenY / 2f,
+        screenY / 1.5f,
         screenX/2 + width,
         screenY.toFloat())
 
@@ -81,7 +79,28 @@ class Player(
     }
 
     fun update(fps: Long, score: Int) {
-        if (state == run) {
+
+        if (isJumping && jumpCounter <= 10) {
+            position.top -= (speed*3f) / fps
+            jumpCounter ++
+            if (jumpCounter == 10) {
+                isJumping = false
+                jumpCounter = 0
+            }
+        } else if (!isJumping && position.top < lowestPosition) {
+            position.top += speed / fps
+            visibleBitmap = Bitmap.createScaledBitmap(jump2Bitmap,
+                width.toInt() ,
+                height.toInt() ,
+                false)
+        } else if (state == jump) {
+            position.top -= (speed*1.5f) / fps
+            isJumping = true
+            visibleBitmap = Bitmap.createScaledBitmap(jump1Bitmap,
+                width.toInt() ,
+                height.toInt() ,
+                false)
+        } else if (state == run) {
              if (score != currentScore) {
                  if (currentRunBitmap == 5){
                      currentRunBitmap = 0
@@ -92,19 +111,8 @@ class Player(
                  }
              }
 
-            if (position.top < lowestPosition) {
-                position.top += speed / fps
-            }
-
-            visibleBitmap = Bitmap.createScaledBitmap(runningBitmaps[currentRunBitmap],
-                width.toInt() ,
-                height.toInt() ,
-                false)
-        }
-
-        else if (state == jump) {
-            position.top -= (speed*1.5f) / fps
-            visibleBitmap = Bitmap.createScaledBitmap(jump1Bitmap,
+            visibleBitmap = Bitmap.createScaledBitmap(
+                runningBitmaps[currentRunBitmap],
                 width.toInt() ,
                 height.toInt() ,
                 false)
